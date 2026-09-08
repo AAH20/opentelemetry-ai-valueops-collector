@@ -15,8 +15,8 @@ provider "azurerm" {
 
 variable "name" {
   description = "Short workload name used in Azure resource names."
-  type    = string
-  default = "aivalueops"
+  type        = string
+  default     = "aivalueops"
 }
 
 variable "location" {
