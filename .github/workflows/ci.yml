@@ -1,0 +1,57 @@
+name: ci
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: {go-version: "1.24.x"}
+      - run: gofmt -w cmd internal && git diff --exit-code
+      - run: go vet ./...
+      - run: go test -race -cover ./...
+      - run: go build -trimpath ./cmd/valueops
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform fmt -check -recursive deploy/terraform
+      - run: terraform -chdir=deploy/terraform/azure init -backend=false
+      - run: terraform -chdir=deploy/terraform/azure validate
+      - uses: azure/setup-helm@v4
+      - run: helm lint deploy/helm --set apiKeySecretName=fixture-secret
+      - uses: hadolint/hadolint-action@v3.1.0
+        with: {dockerfile: Dockerfile}
+*** Add File: /Users/ahmedhassan/Downloads/a2z-soc-main 2/opentelemetry-ai-valueops-collector/docs/architecture.md
+# Architecture and evidence boundaries
+
+```mermaid
+flowchart LR
+  A[Agent frameworks and model gateways] -->|OTLP adapter| B[Trace ingestion]
+  C[NIM / vLLM / GPU telemetry] -->|normalized event| B
+  B --> D[Effective-date rate card]
+  E[Business outcome API] --> F[Trace correlation]
+  D --> F
+  F --> G[Unit-economics ledger]
+  G --> H[Prometheus metrics]
+  G --> I[Azure Monitor / database exporter roadmap]
+```
+
+## Implemented now
+
+- Authenticated JSON trace and outcome endpoints with strict one-megabyte request limits
+- Duplicate-event and trace collision rejection
+- Effective-date model, GPU and tool rate cards
+- Trace-level cost, outcome, revenue, margin and retry-waste correlation
+- Prometheus exposition, health checks, tests and non-root container packaging
+- Helm deployment and a deliberately incomplete Azure foundation
+
+## Not yet implemented
+
+- Native OTLP/gRPC and OpenTelemetry Collector component interfaces
+- Persistent PostgreSQL or ClickHouse ledger
+- Azure Cost Management, OpenCost, DCGM and Foundry adapters
+- mTLS/OIDC, tenant-level authorization, encryption keys and retention workflows
+- GitOps routing proposals, shadow execution and verified-savings reconciliation
+
+The repository must not be represented as a complete Collector distribution or production SaaS
+until those capabilities and a threat model have been implemented and independently reviewed.

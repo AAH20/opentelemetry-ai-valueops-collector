@@ -1,0 +1,13 @@
+replicaCount: 2
+image:
+  repository: ghcr.io/aah20/opentelemetry-ai-valueops-collector
+  tag: latest
+  pullPolicy: IfNotPresent
+service:
+  port: 8080
+resources:
+  requests: {cpu: 100m, memory: 128Mi}
+  limits: {cpu: 500m, memory: 256Mi}
+apiKeySecretName: ai-valueops-api-key
+rateCards: |-
+  [{"provider":"azure-openai","model":"configure-me","effective_from":"2026-01-01T00:00:00Z","input_per_million_usd":0,"output_per_million_usd":0,"gpu_hour_usd":0,"tool_call_usd":0}]
