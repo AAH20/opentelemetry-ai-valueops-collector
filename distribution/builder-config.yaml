@@ -1,0 +1,32 @@
+dist:
+  module: github.com/AAH20/opentelemetry-ai-valueops-collector/distribution/generated
+  name: otelcol-ai-valueops
+  description: OpenTelemetry Collector distribution with AI execution-to-value metrics
+  version: 0.1.0
+  output_path: ./distribution/generated
+
+receivers:
+  - gomod: go.opentelemetry.io/collector/receiver/otlpreceiver v0.159.0
+
+processors:
+  - gomod: go.opentelemetry.io/collector/processor/batchprocessor v0.159.0
+  - gomod: go.opentelemetry.io/collector/processor/memorylimiterprocessor v0.159.0
+
+connectors:
+  - gomod: github.com/AAH20/opentelemetry-ai-valueops-collector v0.0.0
+    import: github.com/AAH20/opentelemetry-ai-valueops-collector/component/aivalueconnector
+    path: .
+
+exporters:
+  - gomod: go.opentelemetry.io/collector/exporter/debugexporter v0.159.0
+  - gomod: go.opentelemetry.io/collector/exporter/otlpexporter v0.159.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusexporter v0.159.0
+
+providers:
+  - gomod: go.opentelemetry.io/collector/confmap/provider/envprovider v1.65.0
+  - gomod: go.opentelemetry.io/collector/confmap/provider/fileprovider v1.65.0
+  - gomod: go.opentelemetry.io/collector/confmap/provider/yamlprovider v1.65.0
+
+telemetry:
+  gomod: go.opentelemetry.io/collector/service v0.159.0
+  import: go.opentelemetry.io/collector/service/telemetry/otelconftelemetry

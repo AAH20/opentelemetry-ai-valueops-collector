@@ -1,0 +1,44 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+  batch: {}
+
+connectors:
+  aivalue:
+    dimensions: [tenant.id, gen_ai.operation.name, gen_ai.provider.name, gen_ai.request.model]
+    max_dimensions: 4
+    hash_tenant_id: true
+    drop_unpriced: true
+    rate_cards:
+      - provider: nvidia
+        model: nim-model
+        effective_from: "2026-01-01T00:00:00Z"
+        input_per_million_usd: 0
+        output_per_million_usd: 0
+        gpu_hour_usd: 4
+        tool_call_usd: 0.005
+
+exporters:
+  debug: {}
+  prometheus:
+    endpoint: 0.0.0.0:9464
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [aivalue, debug]
+    metrics:
+      receivers: [aivalue]
+      processors: [batch]
+      exporters: [prometheus, debug]

@@ -3,9 +3,10 @@
 Vendor-neutral AI unit economics for **OpenTelemetry, Azure AI Foundry, NVIDIA NIM, vLLM,
 Kubernetes, LangChain, LangGraph, CrewAI and MCP**.
 
-[Architecture](docs/architecture.md) · [Security](SECURITY.md) · [A2Z SOC](https://a2zsoc.com)
+[Architecture](docs/architecture.md) · [Span contract](docs/span-contract.md) ·
+[Security](SECURITY.md) · [A2Z SOC](https://a2zsoc.com)
 
-This repository is an early, executable OSS foundation for connecting an AI trace to its model,
+This repository is an executable OSS foundation for connecting an AI trace to its model,
 GPU and tool cost and then to an accepted business outcome. It answers a harder question than
 cost per token: **what did each accepted outcome cost, and did the tenant remain profitable?**
 
@@ -18,9 +19,23 @@ cost per token: **what did each accepted outcome cost, and did the tenant remain
 - Cost per accepted outcome, gross margin, attribution coverage and retry-waste KPIs
 - Duplicate event and trace collision rejection
 - Unit and API tests, race detection, container build, Helm chart and Azure Terraform foundation
+- Native OpenTelemetry traces-to-metrics `aivalue` connector
+- Collector Builder manifest with OTLP, batching, memory limiting and Prometheus export
 
-This is not yet a native OTLP receiver or OpenTelemetry Collector component. The implemented and
-planned boundaries are documented explicitly in [the architecture](docs/architecture.md).
+The native connector is alpha. Durable business-outcome correlation remains in the authenticated
+service while the connector converts outcome attributes already present on spans. Implemented and
+planned boundaries are documented in [the architecture](docs/architecture.md).
+
+## Build the Collector distribution
+
+```bash
+go install go.opentelemetry.io/collector/cmd/builder@v0.159.0
+builder --config distribution/builder-config.yaml
+./distribution/generated/otelcol-ai-valueops --config distribution/collector-config.yaml
+```
+
+The example pipeline receives OTLP on ports `4317` and `4318` and exports bounded economic
+metrics for Prometheus on port `9464`.
 
 ## Run locally
 
@@ -60,9 +75,9 @@ customer telemetry.
 
 ## Roadmap
 
-1. Build native OpenTelemetry Collector receiver/processor/exporter interfaces.
-2. Add PostgreSQL and ClickHouse append-only ledgers with migrations.
-3. Add OpenCost, DCGM, NIM, Azure Cost Management and Foundry evaluation adapters.
+1. Add PostgreSQL and ClickHouse append-only ledgers with migrations.
+2. Add OpenCost, DCGM, NIM, Azure Cost Management and Foundry evaluation adapters.
+3. Add bounded state for asynchronous outcome correlation inside the Collector pipeline.
 4. Generate review-gated GitOps routing proposals and shadow-test evidence.
 5. Reconcile post-change billing before recording independently verified savings.
 

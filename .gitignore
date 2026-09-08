@@ -3,3 +3,4 @@ coverage.out
 .terraform/
 *.tfstate*
 .DS_Store
+distribution/generated/
